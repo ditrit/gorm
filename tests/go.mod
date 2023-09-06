@@ -22,9 +22,9 @@ require (
 	github.com/jackc/pgx/v5 v5.4.3 // indirect
 	github.com/jinzhu/inflection v1.0.0 // indirect
 	github.com/mattn/go-sqlite3 v1.14.17 // indirect
-	github.com/microsoft/go-mssqldb v1.5.0 // indirect
-	golang.org/x/crypto v0.12.0 // indirect
-	golang.org/x/text v0.12.0 // indirect
+	github.com/microsoft/go-mssqldb v1.6.0 // indirect
+	golang.org/x/crypto v0.13.0 // indirect
+	golang.org/x/text v0.13.0 // indirect
 )
 
 replace gorm.io/gorm => ../

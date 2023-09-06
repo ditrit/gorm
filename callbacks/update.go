@@ -69,7 +69,19 @@ func Update(config *Config) func(db *gorm.DB) {
 
 		if db.Statement.SQL.Len() == 0 {
 			db.Statement.SQL.Grow(180)
-			db.Statement.AddClauseIfNotExists(clause.Update{})
+
+			updateClause := clause.Update{}
+			if v, ok := db.Statement.Clauses["UPDATE"].Expression.(clause.Update); ok {
+				updateClause = v
+			}
+
+			if len(db.Statement.Joins) != 0 || len(updateClause.Joins) != 0 {
+				updateClause.Joins = append(updateClause.Joins, genJoinClauses(db, &clause.Select{})...)
+				db.Statement.AddClause(updateClause)
+			} else {
+				db.Statement.AddClauseIfNotExists(clause.Update{})
+			}
+
 			if _, ok := db.Statement.Clauses["SET"]; !ok {
 				if set := ConvertToAssignments(db.Statement); len(set) != 0 {
 					defer delete(db.Statement.Clauses, "SET")
