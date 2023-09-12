@@ -765,9 +765,9 @@ func TestSaveWithPrimaryValue(t *testing.T) {
 	}
 }
 
-// only sqlite, postgres support returning
+// only sqlite, postgres, sqlserver support returning
 func TestUpdateReturning(t *testing.T) {
-	if DB.Dialector.Name() != "sqlite" && DB.Dialector.Name() != "postgres" {
+	if DB.Dialector.Name() != "sqlite" && DB.Dialector.Name() != "postgres" && DB.Dialector.Name() != "sqlserver" {
 		return
 	}
 
@@ -775,6 +775,7 @@ func TestUpdateReturning(t *testing.T) {
 		GetUser("update-returning-1", Config{}),
 		GetUser("update-returning-2", Config{}),
 		GetUser("update-returning-3", Config{}),
+		GetUser("update-returning-4", Config{Pets: 1}),
 	}
 	DB.Create(&users)
 
@@ -795,6 +796,18 @@ func TestUpdateReturning(t *testing.T) {
 	if results[1].Age-results[0].Age != 100 {
 		t.Errorf("failed to return updated age column")
 	}
+
+	var result User
+	DB.Model(&result).Where("name = ?", users[3].Name).Clauses(clause.Returning{}).Preload("Pets").Update("age", 38)
+	if result.Age != 38 {
+		t.Errorf("failed to return updated data, got %v", results)
+	}
+
+	if len(result.Pets) != 1 {
+		t.Errorf("failed to preload pets, got %v", result.Pets)
+	}
+
+	CheckPet(t, *result.Pets[0], *users[3].Pets[0])
 }
 
 func TestUpdateWithDiffSchema(t *testing.T) {
